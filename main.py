@@ -4,6 +4,7 @@
 from loan_payment_calculator.vb_loan_calculator import LoanPaymentCalculator
 from savings_tracker.savings import SavingsTracker
 from db_handler import DatabaseHandler
+from user_handler import UserHandler  # Import the UserHandler class
 
 def main():
     """
@@ -11,8 +12,14 @@ def main():
     """
     print("Welcome to the Village Banking Application!")
 
-    # Initialize the database handler
+    # Initialize the database handlers
     db_handler = DatabaseHandler(
+        host="localhost",
+        user="root",
+        password="S3k3l3t1*",
+        database="VillageBankingDB"
+    )
+    user_handler = UserHandler(
         host="localhost",
         user="root",
         password="S3k3l3t1*",
@@ -23,9 +30,10 @@ def main():
         print("\nPlease select an option:")
         print("1. Loan Payment Calculator")
         print("2. Savings Tracker")
-        print("3. Exit")
+        print("3. User Management")
+        print("4. Exit")
 
-        choice = input("Enter your choice (1/2/3): ")
+        choice = input("Enter your choice (1/2/3/4): ")
 
         if choice == "1":
             # Loan Payment Calculator
@@ -103,6 +111,28 @@ def main():
                 print("Savings data was not saved to the database.")
 
         elif choice == "3":
+            # User Management
+            print("\n--- User Management ---")
+            print("1. Create New User")
+            print("2. Delete Existing User")
+            user_choice = input("Enter your choice (1/2): ")
+
+            if user_choice == "1":
+                # Create New User
+                name = input("Enter the user's full name: ")
+                email = input("Enter the user's email address: ")
+                phone = input("Enter the user's phone number: ")
+                user_handler.create_user(name, email, phone)
+
+            elif user_choice == "2":
+                # Delete Existing User
+                user_id = int(input("Enter the user ID to delete: "))
+                user_handler.delete_user(user_id)
+
+            else:
+                print("Invalid choice. Returning to the main menu.")
+
+        elif choice == "4":
             print("Thank you for using the Village Banking Application. Goodbye!")
             break
 
