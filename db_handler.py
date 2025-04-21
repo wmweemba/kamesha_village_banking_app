@@ -65,7 +65,7 @@ class DatabaseHandler:
 
     def save_loan(self, user_id, principal, interest_rate, installments, total_payment, total_interest):
         """
-        Save loan data to the database.
+        Save loan data to the database and return the loan_id.
 
         Args:
             user_id (int): The ID of the user.
@@ -74,6 +74,9 @@ class DatabaseHandler:
             installments (int): The number of installments (months).
             total_payment (float): The total payment for the loan.
             total_interest (float): The total interest paid for the loan.
+
+        Returns:
+            int: The ID of the newly inserted loan.
         """
         try:
             connection = self.connect()
@@ -86,10 +89,14 @@ class DatabaseHandler:
             cursor.execute(query, (user_id, principal, interest_rate, installments, total_payment, total_interest))
             connection.commit()
 
+            # Retrieve the ID of the newly inserted loan
+            loan_id = cursor.lastrowid
             print("Loan data has been successfully saved to the database.")
+            return loan_id
 
         except mysql.connector.Error as err:
             print(f"Error: {err}")
+            return None
         finally:
             if connection.is_connected():
                 cursor.close()
