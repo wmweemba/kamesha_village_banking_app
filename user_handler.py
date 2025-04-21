@@ -86,3 +86,31 @@ class UserHandler:
             if connection.is_connected():
                 cursor.close()
                 connection.close()
+
+    def user_exists(self, user_id):
+        """
+        Check if a user exists in the database.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            bool: True if the user exists, False otherwise.
+        """
+        try:
+            connection = self.connect()
+            cursor = connection.cursor()
+
+            query = "SELECT COUNT(*) FROM Users WHERE user_id = %s"
+            cursor.execute(query, (user_id,))
+            result = cursor.fetchone()
+
+            return result[0] > 0  # Return True if the user exists
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
