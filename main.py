@@ -71,14 +71,18 @@ def main():
                     payment_schedule = loan_calculator.generate_payment_schedule()
                     db_handler.save_loan_payments(loan_id, payment_schedule)
 
-                    # Record loan issuance transaction
-                    account_id = int(input("Enter the bank account ID: "))  # Assuming account ID is known
-                    db_handler.save_transaction(
-                        account_id=account_id,
-                        transaction_type='debit',
-                        amount=principal,
-                        description=f"Loan issued to user {user_id}"
-                    )
+                    # Retrieve or create the bank account for the user
+                    account_id = db_handler.get_or_create_bank_account(user_id)
+                    if account_id:
+                        # Record loan issuance transaction
+                        db_handler.save_transaction(
+                            account_id=account_id,
+                            transaction_type='debit',
+                            amount=principal,
+                            description=f"Loan issued to user {user_id}"
+                        )
+                    else:
+                        print("Failed to retrieve or create a bank account for the user.")
                 else:
                     print("Failed to save loan data.")
             else:
