@@ -57,34 +57,39 @@ def main():
             save_to_db = input("Would you like to save this loan data to the database? (yes/no): ").strip().lower()
             if save_to_db == "yes":
                 user_id = int(input("Enter your user ID: "))  # Assuming user ID is known
-                loan_id = db_handler.save_loan(
-                    user_id=user_id,
-                    principal=principal,
-                    interest_rate=interest_rate,
-                    installments=installments,
-                    total_payment=loan_results['total_payment'],
-                    total_interest=loan_results['total_interest']
-                )
 
-                if loan_id:
-                    # Generate and save payment schedule
-                    payment_schedule = loan_calculator.generate_payment_schedule()
-                    db_handler.save_loan_payments(loan_id, payment_schedule)
-
-                    # Retrieve or create the bank account for the user
-                    account_id = db_handler.get_or_create_bank_account(user_id)
-                    if account_id:
-                        # Record loan issuance transaction
-                        db_handler.save_transaction(
-                            account_id=account_id,
-                            transaction_type='debit',
-                            amount=principal,
-                            description=f"Loan issued to user {user_id}"
-                        )
-                    else:
-                        print("Failed to retrieve or create a bank account for the user.")
+                # Check if the user exists
+                if not user_handler.user_exists(user_id):
+                    print(f"User with ID {user_id} does not exist. Please create the user first.")
                 else:
-                    print("Failed to save loan data.")
+                    loan_id = db_handler.save_loan(
+                        user_id=user_id,
+                        principal=principal,
+                        interest_rate=interest_rate,
+                        installments=installments,
+                        total_payment=loan_results['total_payment'],
+                        total_interest=loan_results['total_interest']
+                    )
+
+                    if loan_id:
+                        # Generate and save payment schedule
+                        payment_schedule = loan_calculator.generate_payment_schedule()
+                        db_handler.save_loan_payments(loan_id, payment_schedule)
+
+                        # Retrieve or create the bank account for the user
+                        account_id = db_handler.get_or_create_bank_account(user_id)
+                        if account_id:
+                            # Record loan issuance transaction
+                            db_handler.save_transaction(
+                                account_id=account_id,
+                                transaction_type='debit',
+                                amount=principal,
+                                description=f"Loan issued to user {user_id}"
+                            )
+                        else:
+                            print("Failed to retrieve or create a bank account for the user.")
+                    else:
+                        print("Failed to save loan data.")
             else:
                 print("Loan data was not saved to the database.")
 
