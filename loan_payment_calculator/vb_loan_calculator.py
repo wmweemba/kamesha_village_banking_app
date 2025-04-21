@@ -5,6 +5,9 @@ This module contains functionality that calculates loan payments for a village b
 It includes a class to calculate the monthly payment, total payment, and total interest paid on a loan.
 """
 
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 class LoanPaymentCalculator:
     """
     A class to calculate loan payments, total payment, and total interest for a loan.
@@ -67,6 +70,34 @@ class LoanPaymentCalculator:
             "total_payment": total_payment,
             "total_interest": total_interest,
         }
+
+    def generate_payment_schedule(self):
+        """
+        Generate the monthly payment schedule for the loan.
+
+        Returns:
+            list: A list of dictionaries containing payment details for each month.
+        """
+        monthly_principal = self.principal / self.installments
+        remaining_principal = self.principal
+        payment_schedule = []
+
+        for month in range(1, self.installments + 1):
+            monthly_interest = remaining_principal * self.interest_rate
+            monthly_payment = monthly_principal + monthly_interest
+            due_date = (datetime.now() + relativedelta(months=month)).date()
+
+            payment_schedule.append({
+                "month": month,
+                "monthly_payment": monthly_payment,
+                "monthly_interest": monthly_interest,
+                "principal_payment": monthly_principal,
+                "due_date": due_date
+            })
+
+            remaining_principal -= monthly_principal
+
+        return payment_schedule
 
 
 # Example usage
