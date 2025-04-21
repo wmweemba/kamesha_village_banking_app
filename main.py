@@ -57,7 +57,7 @@ def main():
             save_to_db = input("Would you like to save this loan data to the database? (yes/no): ").strip().lower()
             if save_to_db == "yes":
                 user_id = int(input("Enter your user ID: "))  # Assuming user ID is known
-                db_handler.save_loan(
+                loan_id = db_handler.save_loan(
                     user_id=user_id,
                     principal=principal,
                     interest_rate=interest_rate,
@@ -66,18 +66,21 @@ def main():
                     total_interest=loan_results['total_interest']
                 )
 
-                # Generate and save payment schedule
-                payment_schedule = loan_calculator.generate_payment_schedule()
-                db_handler.save_loan_payments(loan_id, payment_schedule)
+                if loan_id:
+                    # Generate and save payment schedule
+                    payment_schedule = loan_calculator.generate_payment_schedule()
+                    db_handler.save_loan_payments(loan_id, payment_schedule)
 
-                # Record loan issuance transaction
-                account_id = int(input("Enter the bank account ID: "))  # Assuming account ID is known
-                db_handler.save_transaction(
-                    account_id=account_id,
-                    transaction_type='debit',
-                    amount=principal,
-                    description=f"Loan issued to user {user_id}"
-                )
+                    # Record loan issuance transaction
+                    account_id = int(input("Enter the bank account ID: "))  # Assuming account ID is known
+                    db_handler.save_transaction(
+                        account_id=account_id,
+                        transaction_type='debit',
+                        amount=principal,
+                        description=f"Loan issued to user {user_id}"
+                    )
+                else:
+                    print("Failed to save loan data.")
             else:
                 print("Loan data was not saved to the database.")
 
