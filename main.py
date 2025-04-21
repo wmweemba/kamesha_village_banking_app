@@ -57,6 +57,19 @@ def main():
                     total_payment=loan_results['total_payment'],
                     total_interest=loan_results['total_interest']
                 )
+
+                # Generate and save payment schedule
+                payment_schedule = loan_calculator.generate_payment_schedule()
+                db_handler.save_loan_payments(loan_id, payment_schedule)
+
+                # Record loan issuance transaction
+                account_id = int(input("Enter the bank account ID: "))  # Assuming account ID is known
+                db_handler.save_transaction(
+                    account_id=account_id,
+                    transaction_type='debit',
+                    amount=principal,
+                    description=f"Loan issued to user {user_id}"
+                )
             else:
                 print("Loan data was not saved to the database.")
 

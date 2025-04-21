@@ -27,14 +27,16 @@ CREATE TABLE Loans (
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE -- Link to Users table
 );
 
--- Table to store monthly loan payment breakdown
+-- Adjusted LoanPayments table
 CREATE TABLE LoanPayments (
     payment_id INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for each payment
     loan_id INT NOT NULL,                      -- Foreign key linking to the Loans table
     month INT NOT NULL,                        -- Month number of the payment
     monthly_payment DECIMAL(10, 2) NOT NULL,   -- Total payment for the month
     monthly_interest DECIMAL(10, 2) NOT NULL,  -- Interest paid for the month
-    remaining_principal DECIMAL(10, 2) NOT NULL, -- Remaining principal after the payment
+    principal_payment DECIMAL(10, 2) NOT NULL, -- Principal portion of the payment
+    due_date DATE NOT NULL,                    -- Due date for the payment
+    status ENUM('pending', 'paid') DEFAULT 'pending', -- Payment status
     FOREIGN KEY (loan_id) REFERENCES Loans(loan_id) ON DELETE CASCADE
 );
 
@@ -61,7 +63,7 @@ CREATE TABLE BankAccounts (
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE -- Link to Users table
 );
 
--- Table to track transactions for bank accounts
+-- Adjusted Transactions table
 CREATE TABLE Transactions (
     transaction_id INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for each transaction
     account_id INT NOT NULL,                       -- Foreign key linking to the BankAccounts table
@@ -69,6 +71,6 @@ CREATE TABLE Transactions (
     amount DECIMAL(15, 2) NOT NULL,                -- Amount of the transaction
     description VARCHAR(255),                      -- Description of the transaction
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when the transaction was created
-    FOREIGN KEY (account_id) REFERENCES BankAccounts(account_id) ON DELETE CASCADE -- Link to BankAccounts table
+    FOREIGN KEY (account_id) REFERENCES BankAccounts(account_id) ON DELETE CASCADE
 );
 
