@@ -177,3 +177,42 @@ class DatabaseHandler:
             if connection.is_connected():
                 cursor.close()
                 connection.close()
+
+    def get_or_create_bank_account(self, user_id):
+        """
+        Retrieve the bank account for a user. If it doesn't exist, create one.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            int: The account_id of the user's bank account.
+        """
+        try:
+            connection = self.connect()
+            cursor = connection.cursor()
+
+            # Check if the bank account exists
+            query = "SELECT account_id FROM BankAccounts WHERE user_id = %s"
+            cursor.execute(query, (user_id,))
+            result = cursor.fetchone()
+
+            if result:
+                # Bank account exists, return the account_id
+                return result[0]
+            else:
+                # Create a new bank account for the user
+                insert_query = "INSERT INTO BankAccounts (user_id, balance) VALUES (%s, %s)"
+                cursor.execute(insert_query, (user_id, 0))  # Initialize balance to 0
+                connection.commit()
+
+                # Return the newly created account_id
+                return cursor.lastrowid
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return None
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
