@@ -107,10 +107,11 @@ def main():
             print(f"Total Interest Earned: {savings_results['total_interest']:.2f}")
             print(f"Total Amount at End of Cycle: {savings_results['total_amount']:.2f}")
 
-            # Ask the user if they want to save the data to the database
+            # Ask the user if they want to save the savings data to the database
             save_to_db = input("Would you like to save this savings data to the database? (yes/no): ").strip().lower()
             if save_to_db == "yes":
-                user_id = int(input("Enter your user ID: "))  # Assuming user ID is known
+                user_id = int(input("Enter your user ID: "))
+                # Save the savings record
                 db_handler.save_savings(
                     user_id=user_id,
                     monthly_savings=savings,
@@ -119,6 +120,18 @@ def main():
                     total_interest=savings_results['total_interest'],
                     total_amount=savings_results['total_amount']
                 )
+                # Retrieve or create the bank account for the user
+                account_id = db_handler.get_or_create_bank_account(user_id)
+                if account_id:
+                    # Record savings deposit transaction. Treat the total savings deposit as a credit to the bank.
+                    db_handler.save_transaction(
+                        account_id=account_id,
+                        transaction_type='credit',
+                        amount=savings_results['total_amount'],
+                        description=f"Savings deposit by user {user_id}"
+                    )
+                else:
+                    print("Failed to retrieve or create a bank account for the user.")
             else:
                 print("Savings data was not saved to the database.")
 
