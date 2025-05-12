@@ -31,9 +31,10 @@ def main():
         print("1. Loan Payment Calculator")
         print("2. Savings Tracker")
         print("3. User Management")
+        print("5. Loan Repayment")
         print("4. Exit")
 
-        choice = input("Enter your choice (1/2/3/4): ")
+        choice = input("Enter your choice (1/2/3/5/4): ")
 
         if choice == "1":
             # Loan Payment Calculator
@@ -156,6 +157,26 @@ def main():
 
             else:
                 print("Invalid choice. Returning to the main menu.")
+
+        elif choice == "5":
+            # Loan Repayment
+            print("\n--- Loan Repayment ---")
+            user_id = int(input("Enter your user ID: "))
+            loan_id = int(input("Enter the loan ID you wish to repay: "))
+            installment = int(input("Enter the installment month to repay: "))
+            payment_amount = float(input("Enter the repayment amount: "))
+
+            # Process the repayment. For this, we assume a new method exists:
+            repayment_success = db_handler.process_loan_repayment(
+                loan_id=loan_id,
+                installment=installment,
+                payment_amount=payment_amount
+            )
+
+            if repayment_success:
+                print("Loan repayment processed successfully.")
+            else:
+                print("Failed to process loan repayment.")
 
         elif choice == "4":
             print("Thank you for using the Village Banking Application. Goodbye!")

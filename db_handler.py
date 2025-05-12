@@ -216,3 +216,85 @@ class DatabaseHandler:
             if connection.is_connected():
                 cursor.close()
                 connection.close()
+
+    def process_loan_repayment(self, loan_id, installment, payment_amount):
+        """
+        Process a loan repayment for a specific installment.
+        
+        This method:
+          - Checks that the installment is pending.
+          - Validates that the payment amount is sufficient.
+          - Updates the LoanPayments record to mark it as 'paid'.
+          - Retrieves (or creates) the user's bank account using user_id from the Loans table.
+          - Records a 'credit' transaction for the repayment.
+          
+        Args:
+            loan_id (int): The ID of the loan.
+            installment (int): The installment (month) number to be repaid.
+            payment_amount (float): The repayment amount provided by the user.
+            
+        Returns:
+            bool: True if repayment was processed successfully, False otherwise.
+        """
+        try:
+            connection = self.connect()
+            cursor = connection.cursor()
+
+            # Check if the specific installment exists and is pending.
+            query = """
+                SELECT payment_id, monthly_payment 
+                FROM LoanPayments 
+                WHERE loan_id = %s AND month = %s AND status = 'pending'
+            """
+            cursor.execute(query, (loan_id, installment))
+            result = cursor.fetchone()
+            if not result:
+                print("No pending installment found or installment already paid.")
+                return False
+
+            payment_id, monthly_payment = result
+
+            # Validate that the payment amount is sufficient.
+            if payment_amount < monthly_payment:
+                print(f"Payment amount ({payment_amount}) is less than the required installment ({monthly_payment}).")
+                return False
+
+            # Mark the installment as 'paid'
+            update_query = "UPDATE LoanPayments SET status = 'paid' WHERE payment_id = %s"
+            cursor.execute(update_query, (payment_id,))
+            connection.commit()  # Commit after updating the installment status
+
+            # Retrieve the user_id for the loan from the Loans table.
+            query_loan = "SELECT user_id FROM Loans WHERE loan_id = %s"
+            cursor.execute(query_loan, (loan_id,))
+            loan_data = cursor.fetchone()
+            if not loan_data:
+                print("Loan not found.")
+                return False
+            user_id = loan_data[0]
+
+            # Retrieve (or create) the bank account for the user.
+            account_id = self.get_or_create_bank_account(user_id)
+            if not account_id:
+                print("Failed to retrieve or create a bank account for the user.")
+                return False
+
+            # Record the repayment transaction.
+            description = f"Loan repayment for loan {loan_id}, installment {installment}"
+            self.save_transaction(
+                account_id=account_id,
+                transaction_type='credit',  # Repayment brings money into the bank account.
+                amount=payment_amount,
+                description=description
+            )
+
+            print("Loan repayment processed successfully.")
+            return True
+
+        except mysql.connector.Error as err:
+            print(f"Error processing loan repayment: {err}")
+            return False
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
