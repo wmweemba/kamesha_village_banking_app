@@ -9,6 +9,7 @@ The Village Banking Application is a comprehensive system designed to manage the
 - **User Management:** Create and delete users, and manage user data securely.
 - **Loan Repayment:** Process loan repayments, update payment status, and record transactions.
 - **Threshold Calculator:** Calculate and store the minimum borrowing threshold per member for each cycle, ensuring fair distribution of funds.
+- **Forced Loan Calculation:** Determine if a member must take a forced loan to meet the threshold, and calculate the required amount.
 - **Database Integration:** All financial records are stored in a MySQL database for persistence and reporting.
 
 ## Directory Structure
@@ -196,6 +197,34 @@ Threshold per member: K26836.55
 Would you like to save this threshold to the database? (yes/no): yes
 Threshold data has been successfully saved to the database.
 ```
+
+### 6. Forced Loan Calculation
+**Goal:** Determine if a member needs a forced loan to meet the group threshold, and calculate the required amount.
+
+**How it works:**
+- The threshold is calculated once for the cycle using the Threshold Calculator.
+- For each member, compare their total borrowed amount to the threshold.
+- If the member has borrowed less than the threshold, the difference is the forced loan amount.
+- If the member meets or exceeds the threshold, no forced loan is required.
+
+**Formula:**
+```
+forced_loan = max(0, threshold - total_borrowed_by_member)
+```
+
+**Sample Usage:**
+```python
+from loan_payment_calculator.threshold_calculator import calculate_forced_loan
+
+threshold = 26836.55  # Example threshold for the cycle
+member_borrowed_amount = 20000
+forced_loan = calculate_forced_loan(threshold, member_borrowed_amount)
+print(f"Forced loan for member: K{forced_loan:.2f}")  # Output: Forced loan for member: K6836.55
+```
+
+**Key Takeaway:**
+- The threshold is a fixed value for the group/cycle.
+- Forced loans ensure all members meet the minimum borrowing requirement for fairness.
 
 ## Database Schema Summary
 The application uses the following main tables:
