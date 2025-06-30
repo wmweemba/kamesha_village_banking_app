@@ -298,3 +298,39 @@ class DatabaseHandler:
             if connection.is_connected():
                 cursor.close()
                 connection.close()
+
+    def save_threshold(self, cycle_name, bank_balance, admin_fees, prepaid_interest, savings_in_advance, retained_balances, other_adjustments, num_members, threshold_amount):
+        """
+        Save threshold calculation data to the Thresholds table.
+
+        Args:
+            cycle_name (str): Name or label for the cycle (e.g., 'June 2024').
+            bank_balance (float): Total funds available.
+            admin_fees (float): Deductions for administrative costs.
+            prepaid_interest (float): Interest paid in advance.
+            savings_in_advance (float): Member savings held for future cycles.
+            retained_balances (float): Funds reserved for specific purposes.
+            other_adjustments (float): Any additional deductions.
+            num_members (int): Number of members in the group.
+            threshold_amount (float): The calculated threshold per member.
+        """
+        try:
+            connection = self.connect()
+            cursor = connection.cursor()
+
+            query = """
+            INSERT INTO Thresholds (
+                cycle_name, bank_balance, admin_fees, prepaid_interest, savings_in_advance, retained_balances, other_adjustments, num_members, threshold_amount
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (
+                cycle_name, bank_balance, admin_fees, prepaid_interest, savings_in_advance, retained_balances, other_adjustments, num_members, threshold_amount
+            ))
+            connection.commit()
+            print("Threshold data has been successfully saved to the database.")
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()

@@ -5,6 +5,7 @@ from loan_payment_calculator.vb_loan_calculator import LoanPaymentCalculator
 from savings_tracker.savings import SavingsTracker
 from db_handler import DatabaseHandler
 from user_handler import UserHandler  # Import the UserHandler class
+from loan_payment_calculator.threshold_calculator import calculate_threshold  # Import the threshold calculator
 
 def main():
     """
@@ -32,9 +33,10 @@ def main():
         print("2. Savings Tracker")
         print("3. User Management")
         print("5. Loan Repayment")
+        print("6. Threshold Calculator")  # Add new menu option
         print("4. Exit")
 
-        choice = input("Enter your choice (1/2/3/5/4): ")
+        choice = input("Enter your choice (1/2/3/5/6/4): ")
 
         if choice == "1":
             # Loan Payment Calculator
@@ -177,6 +179,45 @@ def main():
                 print("Loan repayment processed successfully.")
             else:
                 print("Failed to process loan repayment.")
+
+        elif choice == "6":
+            # Threshold Calculator
+            print("\n--- Threshold Calculator ---")
+            cycle_name = input("Enter the cycle name or period (e.g., 'June 2024'): ")
+            bank_balance = float(input("Enter the total bank balance: "))
+            admin_fees = float(input("Enter the total admin fees: "))
+            prepaid_interest = float(input("Enter the prepaid interest: "))
+            savings_in_advance = float(input("Enter the savings in advance: "))
+            retained_balances = float(input("Enter the retained balances: "))
+            other_adjustments = float(input("Enter any other adjustments (0 if none): "))
+            num_members = int(input("Enter the number of members: "))
+
+            threshold = calculate_threshold(
+                bank_balance=bank_balance,
+                admin_fees=admin_fees,
+                prepaid_interest=prepaid_interest,
+                savings_in_advance=savings_in_advance,
+                retained_balances=retained_balances,
+                other_adjustments=other_adjustments,
+                num_members=num_members
+            )
+            print(f"Threshold per member: K{threshold:.2f}")
+
+            save_to_db = input("Would you like to save this threshold to the database? (yes/no): ").strip().lower()
+            if save_to_db == "yes":
+                db_handler.save_threshold(
+                    cycle_name=cycle_name,
+                    bank_balance=bank_balance,
+                    admin_fees=admin_fees,
+                    prepaid_interest=prepaid_interest,
+                    savings_in_advance=savings_in_advance,
+                    retained_balances=retained_balances,
+                    other_adjustments=other_adjustments,
+                    num_members=num_members,
+                    threshold_amount=threshold
+                )
+            else:
+                print("Threshold was not saved to the database.")
 
         elif choice == "4":
             print("Thank you for using the Village Banking Application. Goodbye!")

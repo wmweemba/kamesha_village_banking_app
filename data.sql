@@ -74,3 +74,18 @@ CREATE TABLE Transactions (
     FOREIGN KEY (account_id) REFERENCES BankAccounts(account_id) ON DELETE CASCADE
 );
 
+-- Table to store threshold calculations for each cycle
+CREATE TABLE Thresholds (
+    threshold_id INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for each threshold entry
+    cycle_name VARCHAR(100) NOT NULL,           -- Name or label for the cycle (e.g., 'June 2024')
+    bank_balance DECIMAL(15, 2) NOT NULL,       -- Total funds available
+    admin_fees DECIMAL(15, 2) NOT NULL,         -- Deductions for administrative costs
+    prepaid_interest DECIMAL(15, 2) NOT NULL,   -- Interest paid in advance
+    savings_in_advance DECIMAL(15, 2) NOT NULL, -- Member savings held for future cycles
+    retained_balances DECIMAL(15, 2) NOT NULL,  -- Funds reserved for specific purposes
+    other_adjustments DECIMAL(15, 2) NOT NULL,  -- Any additional deductions
+    num_members INT NOT NULL,                   -- Number of members in the group
+    threshold_amount DECIMAL(15, 2) NOT NULL,   -- The calculated threshold per member
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp for when the threshold was calculated
+);
+
