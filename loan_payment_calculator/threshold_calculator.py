@@ -40,6 +40,18 @@ def calculate_threshold(
 
     return threshold
 
+def calculate_forced_loan(threshold: float, total_borrowed_by_member: float) -> float:
+    """
+    Calculates the forced loan amount for a member.
+
+    Args:
+        threshold (float): The pre-computed threshold amount for the cycle.
+        total_borrowed_by_member (float): The total amount borrowed by the member.
+
+    Returns:
+        float: The forced loan amount (0 if the member meets or exceeds the threshold).
+    """
+    return max(0, threshold - total_borrowed_by_member)
 
 # Example usage
 if __name__ == "__main__":
@@ -53,4 +65,9 @@ if __name__ == "__main__":
         num_members=20
     )
     print(f"Threshold per member: K{threshold:.2f}")
-    # Output: Threshold per member: K26836.55 
+    # Output: Threshold per member: K26836.55
+
+    # Example forced loan usage
+    member_borrowed_amount = 20000
+    forced_loan = calculate_forced_loan(threshold, member_borrowed_amount)
+    print(f"Forced loan for member: K{forced_loan:.2f}")  # Output: Forced loan for member: K6836.55 
